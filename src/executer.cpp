@@ -5,17 +5,20 @@
 #include <iostream>
 #include <vector>
 
+std::vector<const char *> stringVectorToCString(const std::vector<std::string> &strVec) {
+    std::vector<const char *> cStrVec;
+    for (const std::string &str : strVec)
+        cStrVec.push_back(str.c_str());
+    cStrVec.push_back(nullptr);
+    return cStrVec;
+}
+
 void Executer::execute(const std::vector<std::string> &tokens) {
     if (Builtins::handle(tokens)) return;
-
-    std::vector<const char *> argv; //arraylist or vector of c strings,
-
-    for (const std::string &token : tokens)
-        argv.push_back(token.c_str()); // convert vecto of strings to c strings
-    argv.push_back(nullptr); // \0 char
+    // equivalent of java var keyword for nicer readability.
+    auto argv = stringVectorToCString(tokens);
 
     pid_t pid = fork();
-
     if (pid < 0) // fork failed
         std::cerr << tokens[0] << ": failed to execute command" << std::endl;
     else if (pid == 0) { // child proces
