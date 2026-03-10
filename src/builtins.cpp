@@ -26,7 +26,7 @@ bool Builtins::handle(const std::vector<std::string> &tokens) {
     const std::string& mainCommand = tokens[0];
 
     if (mainCommand == "exit") exit(EXIT_SUCCESS);
-    if (mainCommand == "cd") handleCd(tokens);
+    if (mainCommand == "cd") return handleCd(tokens);
 
     return false;
 }
