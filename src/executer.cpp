@@ -97,7 +97,7 @@ void Executer::execute(std::vector<std::string> tokens) {
     // No output redirection
     if (idx <= 0) {
         msg = Builtins::handle(tokens);
-        if (msg.isEmpty()) {
+        if (!Builtins::isBuiltin(tokens[0])) {
             bool isbackgroundTocken = removeBackgroundToken(tokens);
             auto argv = stringVectorToCString(tokens);
             msg = runCommand(argv, isbackgroundTocken);
@@ -118,7 +118,7 @@ void Executer::execute(std::vector<std::string> tokens) {
     auto splitMessage = splitVectorBefore(tokens, idx);
 
     msg = Builtins::handle(splitMessage);
-    if (msg.isEmpty()) {
+    if (!Builtins::isBuiltin(tokens[0])) {
         auto argv = stringVectorToCString(splitMessage);
         msg = runCommand(argv, false);
     }

@@ -11,5 +11,7 @@ public:
 
     static shellMessage handleHistory();
 
+    static bool isBuiltin(const std::string &cmd);
+
     static shellMessage handle(const std::vector<std::string> &tokens);
 };

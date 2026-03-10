@@ -33,6 +33,9 @@ shellMessage Builtins::handleHistory() {
     return msg;
 }
 
+bool Builtins::isBuiltin(const std::string& cmd) {
+    return (cmd == "cd" || cmd == "history" || cmd == "exit");
+}
 
 shellMessage Builtins::handle(const std::vector<std::string> &tokens) {
     const std::string& mainCommand = tokens[0];
