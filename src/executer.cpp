@@ -13,7 +13,7 @@ std::vector<const char *> Executer::stringVectorToCString(const std::vector<std:
     return cStrVec;
 }
 
-shellMessage Executer::runCommand(std::vector<const char *> argv) {
+shellMessage Executer::runCommand(std::vector<const char *> argv, bool isBackgroundTask) {
     shellMessage msg; // will store both stdout and stderr
 
     int pipefd[2];
@@ -43,6 +43,13 @@ shellMessage Executer::runCommand(std::vector<const char *> argv) {
         }
         _exit(1);
     }
+
+    if (isBackgroundTask) { // return early if its a background task and close the pipes so they dont make us wait.
+        close(pipefd[0]);
+        close(pipefd[1]);
+        return msg;
+    }
+
     close(pipefd[1]);
     char buffer[128];
     ssize_t count;
@@ -68,22 +75,32 @@ std::vector<std::string> Executer::splitVectorBefore(const std::vector<std::stri
     return result;
 }
 
+
+bool Executer::removeBackgroundToken(std::vector<std::string> &tokens) {
+    if (!tokens.empty() && tokens.back() == "&") {
+        tokens.pop_back();
+        return true;
+    }
+    return false;
+}
+
 int Executer::getOutputRedirectionIdx(const std::vector<std::string> &tokens) {
     for (int i=0; i < tokens.size(); ++i)
         if (tokens[i] == ">" || tokens[i] == ">>") return i;
     return -1;
 }
 
-void Executer::execute(const std::vector<std::string> &tokens) {
+void Executer::execute(std::vector<std::string> tokens) {
     int idx = getOutputRedirectionIdx(tokens);
     shellMessage msg;
 
     // No output redirection
-    if (idx < 0) {
+    if (idx <= 0) {
         msg = Builtins::handle(tokens);
         if (msg.isEmpty()) {
+            bool isbackgroundTocken = removeBackgroundToken(tokens);
             auto argv = stringVectorToCString(tokens);
-            msg = runCommand(argv);
+            msg = runCommand(argv, isbackgroundTocken);
         }
         msg.print();
         return;
@@ -103,7 +120,7 @@ void Executer::execute(const std::vector<std::string> &tokens) {
     msg = Builtins::handle(splitMessage);
     if (msg.isEmpty()) {
         auto argv = stringVectorToCString(splitMessage);
-        msg = runCommand(argv);
+        msg = runCommand(argv, false);
     }
 
     // Write output to file
