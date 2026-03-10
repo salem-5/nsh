@@ -7,6 +7,7 @@ add_executable(nsh
         src/builtins.cpp
         src/executer.cpp
         src/parser.cpp
+        src/fileHandling.cpp
 )
 
 target_include_directories(nsh PRIVATE include src)
